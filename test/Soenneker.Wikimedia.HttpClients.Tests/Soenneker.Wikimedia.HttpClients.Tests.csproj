@@ -16,20 +16,13 @@
         </Content>
     </ItemGroup>
 
-<<<<<<< HEAD
     <ItemGroup>
         <PackageReference Include="Soenneker.Utils.Test" Version="4.0.314" />
         <PackageReference Include="Soenneker.Tests.HostedUnit" Version="4.0.13" />
         <PackageReference Include="TUnit" Version="1.37.24" />
-=======
-    <ItemGroup><PackageReference Include="Soenneker.Utils.Test" Version="4.0.315" />
-        <PackageReference Include="Soenneker.Tests.FixturedUnit" Version="4.0.2305" />
-        <PackageReference Include="xUnit.v3" Version="3.2.2" />
->>>>>>> c2e42dc4d995230e652296baa04a7ab95c8f9290
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Soenneker.Wikimedia.HttpClients\Soenneker.Wikimedia.HttpClients.csproj" />
     </ItemGroup>
 </Project>
-
