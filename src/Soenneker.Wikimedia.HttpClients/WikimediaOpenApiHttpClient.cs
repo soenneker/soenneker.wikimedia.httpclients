@@ -16,6 +16,7 @@ public sealed class WikimediaOpenApiHttpClient : IWikimediaOpenApiHttpClient
 {
     private readonly IHttpClientCache _httpClientCache;
     private readonly IConfiguration _config;
+    private readonly string _cacheKey = $"{nameof(WikimediaOpenApiHttpClient)}-{Guid.NewGuid():N}";
 
     private const string _prodBaseUrl = "https://api.wikimedia.org/";
 
@@ -27,12 +28,13 @@ public sealed class WikimediaOpenApiHttpClient : IWikimediaOpenApiHttpClient
 
     public ValueTask<HttpClient> Get(CancellationToken cancellationToken = default)
     {
-        return _httpClientCache.Get(nameof(WikimediaOpenApiHttpClient), (config: _config, baseUrl: _config["Wikimedia:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
+        return _httpClientCache.Get(_cacheKey, (config: _config, baseUrl: _config["Wikimedia:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
         {
-            var apiKey = state.config.GetValueStrict<string>("Wikimedia:ApiKey");
-            string authHeaderName = state.config["Wikimedia:AuthHeaderName"] ?? "Bearer {token}";
-            string authHeaderValueTemplate = state.config["Wikimedia:AuthHeaderValueTemplate"] ?? "{token}";
-            string authHeaderValue = authHeaderValueTemplate.Replace("{token}", apiKey, StringComparison.Ordinal);
+            string accessToken = state.config["Wikimedia:AccessToken"] ?? state.config.GetValueStrict<string>("Wikimedia:ApiKey");
+            var userAgent = state.config.GetValueStrict<string>("Wikimedia:UserAgent");
+            string authHeaderName = state.config["Wikimedia:AuthHeaderName"] ?? "Authorization";
+            string authHeaderValueTemplate = state.config["Wikimedia:AuthHeaderValueTemplate"] ?? "Bearer {token}";
+            string authHeaderValue = authHeaderValueTemplate.Replace("{token}", accessToken, StringComparison.Ordinal);
 
             return new HttpClientOptions
             {
@@ -40,25 +42,19 @@ public sealed class WikimediaOpenApiHttpClient : IWikimediaOpenApiHttpClient
                 DefaultRequestHeaders = new Dictionary<string, string>
                 {
                     {authHeaderName, authHeaderValue},
+                    {"User-Agent", userAgent}
                 }
             };
         }, cancellationToken);
     }
 
-    /// <summary>
-    /// Releases resources used by the current instance.
-    /// </summary>
     public void Dispose()
     {
-        _httpClientCache.RemoveSync(nameof(WikimediaOpenApiHttpClient));
+        _httpClientCache.RemoveSync(_cacheKey);
     }
 
-    /// <summary>
-    /// Asynchronously releases resources used by the current instance.
-    /// </summary>
-    /// <returns>A task that represents the asynchronous operation.</returns>
     public ValueTask DisposeAsync()
     {
-        return _httpClientCache.Remove(nameof(WikimediaOpenApiHttpClient));
+        return _httpClientCache.Remove(_cacheKey);
     }
 }
