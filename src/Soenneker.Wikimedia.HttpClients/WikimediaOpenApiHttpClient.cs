@@ -30,8 +30,8 @@ public sealed class WikimediaOpenApiHttpClient : IWikimediaOpenApiHttpClient
     {
         return _httpClientCache.Get(_cacheKey, (config: _config, baseUrl: _config["Wikimedia:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
         {
-            string accessToken = state.config["Wikimedia:AccessToken"] ?? state.config.GetValueStrict<string>("Wikimedia:ApiKey");
-            var userAgent = state.config.GetValueStrict<string>("Wikimedia:UserAgent");
+            string accessToken = state.config["Wikimedia:AccessToken"] ?? state.config.GetStringStrict("Wikimedia:ApiKey");
+            var userAgent = state.config.GetStringStrict("Wikimedia:UserAgent");
             string authHeaderName = state.config["Wikimedia:AuthHeaderName"] ?? "Authorization";
             string authHeaderValueTemplate = state.config["Wikimedia:AuthHeaderValueTemplate"] ?? "Bearer {token}";
             string authHeaderValue = authHeaderValueTemplate.Replace("{token}", accessToken, StringComparison.Ordinal);
